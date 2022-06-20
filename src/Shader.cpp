@@ -24,14 +24,19 @@ void Shader::Unbind() const {
     GLCall(glUseProgram(0));
 }
 
-void Shader::SetUniform4f(const string& name, float v0, float v1, float v2, float v3) {
+void Shader::SetUniform1i(const string& name, int v0) {
     int location = GetUnifromLocation(name);
-    GLCall(glUniform4f(location, v0, v1, v2, v3));
+    GLCall(glUniform1i(location, v0));
 }
 
 void Shader::SetUniform1f(const string& name, float v0) {
     int location = GetUnifromLocation(name);
     GLCall(glUniform1f(location, v0));
+}
+
+void Shader::SetUniform4f(const string& name, float v0, float v1, float v2, float v3) {
+    int location = GetUnifromLocation(name);
+    GLCall(glUniform4f(location, v0, v1, v2, v3));
 }
 
 

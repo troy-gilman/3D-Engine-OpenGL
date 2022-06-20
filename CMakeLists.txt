@@ -6,7 +6,7 @@ project(3D-Engine-OpenGL VERSION 0.1.0)
 #include(CTest)
 #enable_testing()
 
-file(GLOB main_SRC CONFIGURE_DEPENDS "src/*.hpp" "src/*.cpp")
+file(GLOB main_SRC CONFIGURE_DEPENDS "src/*.hpp" "src/*.cpp" "src/vendor/stb_image/*")
 add_executable(3D-Engine-OpenGL ${main_SRC})
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

@@ -23,8 +23,9 @@ public:
     void Unbind() const;
 
     // Set Uniforms
-    void SetUniform4f(const string& name, float v0, float v1, float v2, float v3);
+    void SetUniform1i(const string& name, int v0);
     void SetUniform1f(const string& name, float v0);
+    void SetUniform4f(const string& name, float v0, float v1, float v2, float v3);
 
 private:
     ShaderProgramSource ParseShader(const string& filepath);
