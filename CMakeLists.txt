@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.12)
 project(3D-Engine-OpenGL VERSION 0.1.0)
 
 #set(CMAKE_CXX_COMPILER "/usr/bin/g++-9")
@@ -6,7 +6,8 @@ project(3D-Engine-OpenGL VERSION 0.1.0)
 #include(CTest)
 #enable_testing()
 
-add_executable(3D-Engine-OpenGL src/main.cpp)
+file(GLOB main_SRC CONFIGURE_DEPENDS "src/*.hpp" "src/*.cpp")
+add_executable(3D-Engine-OpenGL ${main_SRC})
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
