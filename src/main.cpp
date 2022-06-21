@@ -13,6 +13,10 @@
 #include "math/Matrix4f.hpp"
 #include "math/Vector3f.hpp"
 #include "math/Transformations.hpp"
+
+#include "vendor/imgui/imgui.h"
+#include "vendor/imgui/imgui_impl_glfw.h"
+#include "vendor/imgui/imgui_impl_opengl3.h"
 using namespace std;
 
 
@@ -75,14 +79,11 @@ int main() {
     proj.SetOrtho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
     Matrix4f view;
     Transformations::Translate(view, Vector3f(-100.0f, 0.0f, 0.0f));
-    Matrix4f model;
-    Transformations::Translate(model, Vector3f(200, 200, 0));
-    Matrix4f mvp = proj * view * model;
 
     Shader shader("res/shaders/Basic.shader");
     shader.Bind();
     shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
-    shader.SetUniformMat4f("u_MVP", mvp);
+    
 
     Texture texture("res/textures/img.png");
     texture.Bind();
@@ -94,7 +95,13 @@ int main() {
     ib.Unbind();
     
     Renderer renderer;
-    
+
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 130");
+    ImGui::StyleColorsDark();
+
+    Vector3f translation(200, 200, 0);
     float r = 0.0f;
     float increment = 0.01f;
 
@@ -103,8 +110,17 @@ int main() {
         /* Render here */
         renderer.Clear();
 
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        Matrix4f model;
+        Transformations::Translate(model, translation);
+        Matrix4f mvp = proj * view * model;
+
         shader.Bind();
         shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+        shader.SetUniformMat4f("u_MVP", mvp);
 
         renderer.Draw(va, ib, shader);
 
@@ -112,12 +128,24 @@ int main() {
         else if (r < 0.0f) increment = -increment;
         r += increment;
 
+        {
+            ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        }
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
         /* Poll for and process events */
         glfwPollEvents();
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
