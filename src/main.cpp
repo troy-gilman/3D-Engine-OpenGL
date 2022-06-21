@@ -10,6 +10,9 @@
 #include "VertexArray.hpp"
 #include "Shader.hpp"
 #include "Texture.hpp"
+#include "math/Matrix4f.hpp"
+#include "math/Vector3f.hpp"
+#include "math/Transformations.hpp"
 using namespace std;
 
 
@@ -26,7 +29,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(960, 540, "Hello World", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -45,10 +48,10 @@ int main() {
 
 
     float positions[] = {
-        -0.5f, -0.5f, 0.0f, 0.0f,
-         0.5f, -0.5f, 1.0f, 0.0f,
-         0.5f,  0.5f, 1.0f, 1.0f,
-        -0.5f,  0.5f, 0.0f, 1.0f
+        100.0f, 100.0f, 0.0f, 0.0f,
+        200.0f, 100.0f, 1.0f, 0.0f,
+        200.0f, 200.0f, 1.0f, 1.0f,
+        100.0f, 200.0f, 0.0f, 1.0f
     };
 
     unsigned int indices[] = {
@@ -68,9 +71,18 @@ int main() {
 
     IndexBuffer ib(indices, 6);
 
+    Matrix4f proj;
+    proj.SetOrtho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+    Matrix4f view;
+    Transformations::Translate(view, Vector3f(-100.0f, 0.0f, 0.0f));
+    Matrix4f model;
+    Transformations::Translate(model, Vector3f(200, 200, 0));
+    Matrix4f mvp = proj * view * model;
+
     Shader shader("res/shaders/Basic.shader");
     shader.Bind();
     shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+    shader.SetUniformMat4f("u_MVP", mvp);
 
     Texture texture("res/textures/img.png");
     texture.Bind();

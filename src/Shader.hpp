@@ -2,6 +2,8 @@
 
 #include <string>
 #include <unordered_map>
+
+#include "math/Matrix4f.hpp"
 using namespace std;
 
 
@@ -26,6 +28,7 @@ public:
     void SetUniform1i(const string& name, int v0);
     void SetUniform1f(const string& name, float v0);
     void SetUniform4f(const string& name, float v0, float v1, float v2, float v3);
+    void SetUniformMat4f(const string& name, const Matrix4f& matrix);
 
 private:
     ShaderProgramSource ParseShader(const string& filepath);

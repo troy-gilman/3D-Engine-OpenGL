@@ -39,6 +39,11 @@ void Shader::SetUniform4f(const string& name, float v0, float v1, float v2, floa
     GLCall(glUniform4f(location, v0, v1, v2, v3));
 }
 
+void Shader::SetUniformMat4f(const string& name, const Matrix4f& matrix) {
+    int location = GetUnifromLocation(name);
+    GLCall(glUniformMatrix4fv(location, 1, GL_FALSE, matrix.GetAll()));
+}
+
 
 ShaderProgramSource Shader::ParseShader(const string& filepath) {
     ifstream stream(filepath);
