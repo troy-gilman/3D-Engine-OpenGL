@@ -2,17 +2,22 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
-#include "Renderer.hpp"
-#include "VertexBuffer.hpp"
-#include "VertexBufferLayout.hpp"
-#include "IndexBuffer.hpp"
-#include "VertexArray.hpp"
-#include "Shader.hpp"
-#include "Texture.hpp"
+#include "engine/Renderer.hpp"
+#include "engine/IndexBuffer.hpp"
+#include "engine/VertexBufferLayout.hpp"
+#include "engine/IndexBuffer.hpp"
+#include "engine/VertexArray.hpp"
+#include "engine/Shader.hpp"
+#include "engine/Texture.hpp"
+
 #include "math/Matrix4f.hpp"
 #include "math/Vector3f.hpp"
 #include "math/Transformations.hpp"
+
+#include "tests/TestMenu.hpp"
+#include "tests/TestClearColor.hpp"
 
 #include "vendor/imgui/imgui.h"
 #include "vendor/imgui/imgui_impl_glfw.h"
@@ -50,49 +55,8 @@ int main() {
 
     cout << glGetString(GL_VERSION) << endl;
 
-
-    float positions[] = {
-        100.0f, 100.0f, 0.0f, 0.0f,
-        200.0f, 100.0f, 1.0f, 0.0f,
-        200.0f, 200.0f, 1.0f, 1.0f,
-        100.0f, 200.0f, 0.0f, 1.0f
-    };
-
-    unsigned int indices[] = {
-        0, 1, 2, 
-        2, 3, 0
-    };
-
     GLCall(glEnable(GL_BLEND));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
-    VertexArray va;
-    VertexBuffer vb(positions, 4 * 4 * sizeof(float));
-    VertexBufferLayout layout;
-    layout.Push<float>(2);
-    layout.Push<float>(2);
-    va.AddBuffer(vb, layout);
-
-    IndexBuffer ib(indices, 6);
-
-    Matrix4f proj;
-    proj.SetOrtho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
-    Matrix4f view;
-    Transformations::Translate(view, Vector3f(-100.0f, 0.0f, 0.0f));
-
-    Shader shader("res/shaders/Basic.shader");
-    shader.Bind();
-    shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
-    
-
-    Texture texture("res/textures/img.png");
-    texture.Bind();
-    shader.SetUniform1i("u_Texture", 0);
-
-    va.Unbind();
-    shader.Unbind();
-    vb.Unbind();
-    ib.Unbind();
     
     Renderer renderer;
 
@@ -101,47 +65,44 @@ int main() {
     ImGui_ImplOpenGL3_Init("#version 130");
     ImGui::StyleColorsDark();
 
-    Vector3f translation(200, 200, 0);
-    float r = 0.0f;
-    float increment = 0.01f;
+    test::Test* currentTest = nullptr;
+    test::TestMenu* testMenu = new test::TestMenu(currentTest);
+    currentTest = testMenu;
+
+    testMenu->RegisterTest<test::TestClearColor>("Clear Color");
+    
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)) {
-        /* Render here */
+        GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
         renderer.Clear();
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        Matrix4f model;
-        Transformations::Translate(model, translation);
-        Matrix4f mvp = proj * view * model;
-
-        shader.Bind();
-        shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-        shader.SetUniformMat4f("u_MVP", mvp);
-
-        renderer.Draw(va, ib, shader);
-
-        if (r > 1.0f) increment = -increment;
-        else if (r < 0.0f) increment = -increment;
-        r += increment;
-
-        {
-            ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        if (currentTest) {
+            currentTest->OnUpdate(0.0f);
+            currentTest->OnRender();
+            ImGui::Begin("Test");
+            if (currentTest != testMenu && ImGui::Button("<-")) {
+                delete currentTest;
+                currentTest = testMenu;
+            }
+            currentTest->OnImGuiRender();
+            ImGui::End();
         }
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        /* Swap front and back buffers */
         glfwSwapBuffers(window);
-
-        /* Poll for and process events */
         glfwPollEvents();
     }
+
+    delete currentTest;
+    if (currentTest != testMenu)
+        delete testMenu;
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
