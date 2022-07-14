@@ -18,6 +18,7 @@
 
 #include "tests/TestMenu.hpp"
 #include "tests/TestClearColor.hpp"
+#include "tests/Test2D.hpp"
 
 #include "vendor/imgui/imgui.h"
 #include "vendor/imgui/imgui_impl_glfw.h"
@@ -70,6 +71,7 @@ int main() {
     currentTest = testMenu;
 
     testMenu->RegisterTest<test::TestClearColor>("Clear Color");
+    testMenu->RegisterTest<test::Test2D>("2D");
     
 
     /* Loop until the user closes the window */

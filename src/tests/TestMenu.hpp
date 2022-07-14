@@ -9,7 +9,7 @@
 namespace test {
     class TestMenu : public Test {
     private:
-        Test* m_CurrentTest;
+        Test*& m_CurrentTest;
         std::vector<std::pair<std::string, std::function<Test*()>>> m_Tests;
 
     public:
